@@ -1888,20 +1888,25 @@ NativeFeature :: enum u32 {
     PartiallyBoundBindingArray                            :: 196618;
     TextureFormat16bitNorm                                :: 196619;
     TextureCompressionAstcHdr                             :: 196620;
-
     MappablePrimaryBuffers                                :: 196622;
     BufferBindingArray                                    :: 196623;
     UniformBufferAndStorageTextureArrayNonUniformIndexing :: 196624;
 
+    SpirvShaderPassthrough                                :: 196631;
+
     VertexAttribute64bit                                  :: 196633;
-    ShaderUnusedVertexOutput                              :: 196634;
-    TextureFormatNv12                                     :: 196635;
-    RayTracingAccelerationStructure                       :: 196636;
-    RayQuery                                              :: 196637;
-    ShaderF64                                             :: 196638;
-    ShaderI16                                             :: 196639;
-    ShaderPrimitiveIndex                                  :: 196640;
-    ShaderEarlyDepthTest                                  :: 196641;
+    TextureFormatNv12                                     :: 196634;
+    RayTracingAccelerationStructure                       :: 196635;
+    RayQuery                                              :: 196636;
+    ShaderF64                                             :: 196637;
+    ShaderI16                                             :: 196638;
+    ShaderPrimitiveIndex                                  :: 196639;
+    ShaderEarlyDepthTest                                  :: 196640;
+    Subgroup                                              :: 196641;
+    SubgroupVertex                                        :: 196642;
+    SubgroupBarrier                                       :: 196643;
+    TimestampQueryInsideEncoders                          :: 196644;
+    TimestampQueryInsidePasses                            :: 196645;
     Force32                                               :: 2147483647;
 }
 
@@ -2032,6 +2037,12 @@ ShaderModuleGLSLDescriptor :: struct {
     defines:     *ShaderDefine;
 }
 
+ShaderModuleDescriptorSpirV :: struct {
+    label:      *u8;
+    sourceSize: u32;
+    source:     *u32;
+}
+
 RegistryReport :: struct {
     numAllocated:        u64;
     numKeptFromUser:     u64;
@@ -2096,7 +2107,7 @@ QuerySetDescriptorExtras :: struct {
 
 SurfaceConfigurationExtras :: struct {
     chain:                      ChainedStruct;
-    desiredMaximumFrameLatency: Bool;
+    desiredMaximumFrameLatency: u32;
 }
 
 LogCallback :: #type (level: LogLevel, message: *u8, userdata: *void) -> void #c_call;
@@ -2119,6 +2130,7 @@ QueueSubmitForIndex :: (queue: Queue, commandCount: u64, commands: *CommandBuffe
 
 // Returns true if the queue is empty, or false if there are more queue submissions still in flight.
 DevicePoll :: (device: Device, wait: Bool, wrappedSubmissionIndex: *WrappedSubmissionIndex) -> Bool #foreign libwgpu_native "wgpuDevicePoll";
+DeviceCreateShaderModuleSpirV :: (device: Device, descriptor: *ShaderModuleDescriptorSpirV) -> ShaderModule #foreign libwgpu_native "wgpuDeviceCreateShaderModuleSpirV";
 
 SetLogCallback :: (callback: LogCallback, userdata: *void) -> void #foreign libwgpu_native "wgpuSetLogCallback";
 
@@ -2127,6 +2139,7 @@ SetLogLevel :: (level: LogLevel) -> void #foreign libwgpu_native "wgpuSetLogLeve
 GetVersion :: () -> u32 #foreign libwgpu_native "wgpuGetVersion";
 
 RenderPassEncoderSetPushConstants :: (encoder: RenderPassEncoder, stages: ShaderStageFlags, offset: u32, sizeBytes: u32, data: *void) -> void #foreign libwgpu_native "wgpuRenderPassEncoderSetPushConstants";
+ComputePassEncoderSetPushConstants :: (encoder: ComputePassEncoder, offset: u32, sizeBytes: u32, data: *void) -> void #foreign libwgpu_native "wgpuComputePassEncoderSetPushConstants";
 
 RenderPassEncoderMultiDrawIndirect :: (encoder: RenderPassEncoder, buffer: Buffer, offset: u64, count: u32) -> void #foreign libwgpu_native "wgpuRenderPassEncoderMultiDrawIndirect";
 RenderPassEncoderMultiDrawIndexedIndirect :: (encoder: RenderPassEncoder, buffer: Buffer, offset: u64, count: u32) -> void #foreign libwgpu_native "wgpuRenderPassEncoderMultiDrawIndexedIndirect";
@@ -2138,6 +2151,9 @@ ComputePassEncoderBeginPipelineStatisticsQuery :: (computePassEncoder: ComputePa
 ComputePassEncoderEndPipelineStatisticsQuery :: (computePassEncoder: ComputePassEncoder) -> void #foreign libwgpu_native "wgpuComputePassEncoderEndPipelineStatisticsQuery";
 RenderPassEncoderBeginPipelineStatisticsQuery :: (renderPassEncoder: RenderPassEncoder, querySet: QuerySet, queryIndex: u32) -> void #foreign libwgpu_native "wgpuRenderPassEncoderBeginPipelineStatisticsQuery";
 RenderPassEncoderEndPipelineStatisticsQuery :: (renderPassEncoder: RenderPassEncoder) -> void #foreign libwgpu_native "wgpuRenderPassEncoderEndPipelineStatisticsQuery";
+
+ComputePassEncoderWriteTimestamp :: (computePassEncoder: ComputePassEncoder, querySet: QuerySet, queryIndex: u32) -> void #foreign libwgpu_native "wgpuComputePassEncoderWriteTimestamp";
+RenderPassEncoderWriteTimestamp :: (renderPassEncoder: RenderPassEncoder, querySet: QuerySet, queryIndex: u32) -> void #foreign libwgpu_native "wgpuRenderPassEncoderWriteTimestamp";
 
 #scope_file
 
